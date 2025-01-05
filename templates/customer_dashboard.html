@@ -1,0 +1,154 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <title>Customer's Dashboard</title>
+</head>
+<body>
+  <div id="main">
+    <div id="canvas">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="#">Welcome,{{customer.name}}</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#" style="float: inline-end;"></a> <button type="button" class="btn btn-success">Home</button>
+                  </li>
+                <li class="nav-item">
+                  <a href="{{ url_for('search_service') }}" class="btn btn-info">Search for Services</a>
+                </li>
+                </ul>
+                <li class="nav-item"></li>
+                    <a class="nav-link" href="/logout">Logout</a>
+                  </li>
+              </div>
+            </div>
+          </nav>
+          <!-- Flash Messages Section -->
+          {% with messages = get_flashed_messages(with_categories=True) %}
+          {% if messages %}
+            <div class="alert-container mb-4">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+          <!-- Service 4 - Bootstrap Brain Component -->
+<section class="bg-light py-5 py-xl-8">
+    <div class="container">
+      <div class="row justify-content-md-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+          <h3 class="fs-6 mb-2 text-secondary text-center text-uppercase">Looking For Service?</h3>
+          <h2 class="display-5 mb-5 text-center">We are giving you perfect solutions with our proficient services.</h2>
+          <hr class="w-50 mx-auto mb-5 mb-xl-9 border-dark-subtle">
+        </div>
+      </div>
+    </div>
+
+  </section>
+  <div class="container text-center">
+    <h3 class="my-4">Available Services</h3>
+    <div class="row d-flex justify-content-center">
+        {% for service in services %}
+        <div class="col-md-3 mb-4">
+            <div class="service-card card h-100 shadow">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ service.name }}</h5>
+                    <p class="card-text">{{ service.description }}</p>
+                    <a href="{{ url_for('request_service', service_id=service.id) }}" class="btn btn-primary">Request Service</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+                
+        <h4>Your Service History</h4>
+{% if service_requests %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Service Name</th>
+                <th>Service Description</th>
+                <th>Professional Name</th>
+                <th>Phone No.</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in service_requests %}
+            <tr>
+                <td>{{ request.id }}</td>
+                <td>{{ request.service.name if request.service else 'NA' }}</td>
+                <td>{{ request.service.description if request.service else 'NA' }}</td>
+                <td>{{ request.service_professional.name if request.service_professional else 'Not Assigned' }}</td>
+                <td>{{ request.service_professional.phone if request.service_professional else 'NA' }}</td>
+                <td>{{ request.status }}</td>
+                <td>
+                    {% if request.status == 'Requested' %}
+                    <form method="POST" action="{{ url_for('close_service_requests', request_id=request.id) }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Close</button>
+                    </form>
+                    <a href="{{ url_for('edit_service_request', request_id=request.id)}}" class="btn btn-warning btn-sm">Edit</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No service history.</p>
+{% endif %}
+
+<h4>Close Service</h4>
+{% if service_requests %}
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Service Name</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in service_requests %}
+            <tr>
+                <td>{{ request.service.name if request.service else 'NA' }}</td>
+                <td>{{ request.status }}</td>
+                <td>
+                    {% if request.status == 'Assigned' %}
+                    <form method="POST" action="{{ url_for('close_service_requests', request_id=request.id) }}">
+                        <button type="submit" class="btn btn-success">Close Service</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No services available to close.</p>
+{% endif %}
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <title>Admin's Dashboard</title>
+</head>
+<body>
+  <div id="main">
+    <div id="canvas">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="#">Welcome to Admin</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#" style="float: inline-end;"></a> <button type="button" class="btn btn-success">Home</button>
+                  </li>
+                <li class="nav-item"></li>
+                    <a class="nav-link" href="/logout">Logout</a>
+                  </li>
+                </ul> 
+              </div>
+            </div>
+          </nav>
+          <form method="POST" action="{{ url_for('admin_search_professionals') }}">
+            <div class="form-group">
+                <label for="query">Search Professionals</label>
+                <input type="text" name="query" id="query" class="form-control" placeholder="Enter name, location, or pin code">
+            </div>
+            <div class="form-group">
+                <label for="search_by">Search By</label>
+                <select name="search_by" id="search_by" class="form-control">
+                    <option value="name">Name</option>
+                    <option value="location">Location</option>
+                    <option value="pincode">Pin Code</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+        <!-- Flash Messages Section -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+          <div class="alert-container mb-4">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      <h3>Search Results</h3>
+      {% if results %}
+          <table class="table table-bordered">
+              <thead>
+                  <tr>
+                      <th>Name</th>
+                      <th>Location</th>
+                      <th>Pincode</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for professional in results %}
+                  <tr>
+                      <td>{{ professional.name }}</td>
+                      <td>{{ professional.address }}</td>
+                      <td>{{ professional.pincode }}</td>
+                      <td>{{ professional.status }}</td>
+                      <td>
+                          <form method="POST" action="{{ url_for('block_unblock_professional', professional_id=professional.id) }}" style="display:inline-block;">
+                              {% if professional.status == 'Active' %}
+                              <input type="hidden" name="action" value="block">
+                              <button type="submit" class="btn btn-danger">Block</button>
+                              {% else %}
+                              <input type="hidden" name="action" value="unblock">
+                              <button type="submit" class="btn btn-success">Unblock</button>
+                              {% endif %}
+                          </form>
+                          <a href="{{ url_for('admin_review_professional', professional_id=professional.id) }}" class="btn btn-info">Review</a>
+                      </td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      {% else %}
+          <p>No professionals found.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
